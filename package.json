@@ -1,0 +1,9 @@
+{
+  "name": "lexai-contract-analyzer",
+  "version": "1.0.0",
+  "description": "LEX AI - Arabic Legal Contract Analyzer",
+  "type": "module",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0"
+  }
+}

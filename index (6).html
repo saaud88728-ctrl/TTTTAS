@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>LEX AI — نظام تحليل العقود القانونية</title>
+<link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&family=Cinzel:wght@600;700&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#0A0B0E;--surface:#12141A;--border:#1E2129;
+  --gold:#C9A255;--gold-light:#E4C476;--gold-dim:rgba(201,162,85,0.12);
+  --text:#E8E9EA;--text-sec:#8B8D96;--text-dim:#454852;
+  --red:#E63946;--red-dim:rgba(230,57,70,0.10);
+  --orange:#F4A261;--orange-dim:rgba(244,162,97,0.10);
+  --yellow:#F9C74F;--yellow-dim:rgba(249,199,79,0.10);
+  --green:#4CC9A4;--green-dim:rgba(76,201,164,0.10);
+}
+body{background:var(--bg);color:var(--text);font-family:'Tajawal',sans-serif;min-height:100vh}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:var(--surface)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:2px}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+@keyframes glow{0%,100%{box-shadow:0 0 20px rgba(201,162,85,.2)}50%{box-shadow:0 0 40px rgba(201,162,85,.45)}}
+
+/* LOGIN */
+.login-wrap{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:48px 40px;max-width:420px;width:100%;text-align:center;animation:fadeUp .5s ease}
+.login-logo{width:64px;height:64px;background:linear-gradient(135deg,var(--gold),#7A5A10);border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:30px;margin:0 auto 20px}
+.login-title{font-family:'Cinzel',serif;font-size:26px;color:var(--gold-light);letter-spacing:3px;margin-bottom:6px}
+.login-sub{font-size:13px;color:var(--text-sec);margin-bottom:32px}
+.login-input{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:14px 18px;color:var(--text);font-size:16px;font-family:'Tajawal',sans-serif;text-align:center;letter-spacing:4px;margin-bottom:16px;transition:border-color .2s}
+.login-input:focus{outline:none;border-color:var(--gold)}
+.login-btn{width:100%;background:linear-gradient(135deg,var(--gold),#8B6010);color:#0A0B0E;font-weight:800;font-size:16px;padding:14px;border-radius:10px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;animation:glow 2.5s infinite;transition:filter .2s}
+.login-btn:hover{filter:brightness(1.1)}
+.login-err{color:var(--red);font-size:13px;margin-top:10px;min-height:20px}
+
+/* HEADER */
+header{border-bottom:1px solid var(--border);padding:14px 28px;display:flex;align-items:center;justify-content:space-between;background:rgba(10,11,14,.96);backdrop-filter:blur(12px);position:sticky;top:0;z-index:99}
+.logo-wrap{display:flex;align-items:center;gap:14px}
+.logo-icon{width:42px;height:42px;background:linear-gradient(135deg,var(--gold),#7A5A10);border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:20px}
+.logo-name{font-family:'Cinzel',serif;font-size:17px;color:var(--gold-light);letter-spacing:3px;line-height:1}
+.logo-sub{font-size:11px;color:var(--text-sec);margin-top:3px}
+.badge{background:var(--gold-dim);border:1px solid rgba(201,162,85,.35);color:var(--gold);font-size:10px;font-weight:700;padding:4px 13px;border-radius:20px;letter-spacing:1.5px}
+
+/* MAIN */
+.main{max-width:1160px;margin:0 auto;padding:32px 20px}
+.fade-up{animation:fadeUp .5s ease}
+
+/* INPUT SECTION */
+.hero{text-align:center;margin-bottom:32px}
+.hero-tag{font-size:11px;font-weight:700;color:var(--gold);letter-spacing:3px;margin-bottom:12px}
+.hero-title{font-size:clamp(24px,4vw,34px);font-weight:900;background:linear-gradient(130deg,var(--gold-light),var(--gold));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1.2;margin-bottom:12px}
+.hero-sub{color:var(--text-sec);font-size:14px;max-width:500px;margin:0 auto;line-height:1.85}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:22px}
+.card-0p{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:0;overflow:hidden}
+
+.input-header{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center}
+textarea{width:100%;min-height:200px;background:transparent;border:none;padding:18px 20px;color:var(--text);font-size:14px;line-height:1.9;resize:vertical;font-family:'Tajawal',sans-serif}
+textarea:focus{outline:none}
+.input-footer{padding:12px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px}
+.clear-btn{color:var(--text-dim);font-size:12px;background:none;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;transition:color .2s}
+.clear-btn:hover{color:var(--text-sec)}
+.analyze-btn{background:linear-gradient(135deg,var(--gold),#8B6010);color:#0A0B0E;font-weight:800;font-size:14px;padding:11px 30px;border-radius:10px;border:none;cursor:pointer;font-family:'Tajawal',sans-serif;transition:all .2s}
+.analyze-btn:disabled{background:var(--border);color:var(--text-dim);cursor:not-allowed;animation:none}
+.analyze-btn:not(:disabled){animation:glow 2.5s infinite}
+.analyze-btn:not(:disabled):hover{filter:brightness(1.1)}
+
+.demos-row{margin-top:16px;display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.demo-label{color:var(--text-dim);font-size:12px}
+.demo-chip{background:var(--surface);border:1px solid var(--border);color:var(--text-sec);font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;font-family:'Tajawal',sans-serif;transition:all .2s}
+.demo-chip:hover{border-color:var(--gold);color:var(--gold)}
+
+.err-box{margin-top:14px;background:var(--red-dim);border:1px solid rgba(230,57,70,.3);border-radius:12px;padding:13px 18px;color:var(--red);font-size:13px}
+
+/* LOADING */
+.loading-wrap{text-align:center;padding:90px 20px;animation:fadeUp .3s ease}
+.spinner{width:68px;height:68px;border:3px solid var(--border);border-top:3px solid var(--gold);border-radius:50%;margin:0 auto 28px;animation:spin 1s linear infinite}
+.loading-text{font-size:18px;color:var(--gold);font-weight:700;margin-bottom:10px;animation:pulse 1.6s infinite}
+.loading-sub{color:var(--text-dim);font-size:12px;margin-bottom:24px}
+.step-dots{display:flex;justify-content:center;gap:7px}
+.step-dot{height:4px;border-radius:2px;background:var(--border);transition:all .45s}
+.step-dot.active{background:var(--gold);width:28px}
+.step-dot.inactive{width:8px}
+
+/* RESULTS TOP BAR */
+.results-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:22px;flex-wrap:wrap;gap:10px}
+.back-btn{color:var(--text-sec);font-size:13px;padding:8px 16px;border-radius:9px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:'Tajawal',sans-serif;transition:border-color .2s}
+.back-btn:hover{border-color:var(--gold)}
+.contract-type{color:var(--gold);font-size:13px;font-weight:700}
+
+/* RISK + STATS GRID */
+.top-grid{display:grid;grid-template-columns:200px 1fr;gap:14px;margin-bottom:16px}
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:12px}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:18px;display:flex;align-items:center;gap:14px}
+.stat-icon{font-size:24px}
+.stat-val{font-size:30px;font-weight:900;line-height:1;font-family:'JetBrains Mono',monospace}
+.stat-label{font-size:11px;color:var(--text-sec);margin-top:4px}
+
+/* GAUGE */
+.gauge-wrap{text-align:center}
+.gauge-inner{position:relative;width:148px;height:148px;margin:0 auto}
+.gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.gauge-score{font-size:38px;font-weight:800;line-height:1;font-family:'JetBrains Mono',monospace;letter-spacing:-2px}
+.gauge-sub{font-size:10px;color:var(--text-sec);margin-top:4px}
+.gauge-label{margin-top:12px;font-size:13px;font-weight:700}
+
+/* ASSESSMENT */
+.assessment{background:var(--gold-dim);border:1px solid rgba(201,162,85,.28);border-radius:14px;padding:18px 22px;margin-bottom:18px;display:flex;gap:14px;align-items:flex-start}
+.assessment-icon{font-size:20px;flex-shrink:0}
+.assessment-tag{font-size:11px;color:var(--gold);font-weight:700;margin-bottom:6px;letter-spacing:.5px}
+.assessment-text{color:var(--text);font-size:13.5px;line-height:1.85}
+.assessment-exposure{margin-top:8px;font-size:12px;color:var(--text-sec)}
+.exposure-val{color:var(--gold-light);font-weight:700}
+
+/* TABS */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--border);margin-bottom:18px;overflow-x:auto}
+.tab-btn{padding:10px 15px;font-size:13px;color:var(--text-sec);border:none;background:none;cursor:pointer;font-family:'Tajawal',sans-serif;white-space:nowrap;border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .2s}
+.tab-btn.active{color:var(--gold);font-weight:700;border-bottom-color:var(--gold)}
+
+/* ISSUE CARDS */
+.issues-list{display:flex;flex-direction:column;gap:12px}
+.issue-card{background:var(--surface);border-radius:16px;padding:18px 22px;border-right:4px solid}
+.issue-head{display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:8px;align-items:flex-start}
+.issue-title{font-size:14px;font-weight:700}
+.badge-pill{font-size:11px;font-weight:700;padding:3px 10px;border-radius:20px}
+.issue-desc{font-size:13px;color:var(--text-sec);line-height:1.8}
+.impact-box{margin-top:12px;border-radius:9px;padding:9px 14px;font-size:12px;display:flex;gap:8px}
+
+/* MISSING/GRID */
+.two-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+
+/* COMPLIANCE TABLE */
+.compliance-card{background:var(--surface);border:1px solid rgba(249,199,79,.28);border-radius:16px;padding:18px 22px;display:grid;grid-template-columns:1fr 2fr 1fr;gap:18px}
+.comp-label{font-size:10px;color:var(--text-dim);margin-bottom:5px}
+
+/* RECS */
+.rec-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:18px 22px;display:flex;gap:16px;align-items:flex-start}
+.rec-num{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:15px;font-weight:800;font-family:'JetBrains Mono',monospace}
+.rec-impact{font-size:12px;color:var(--text-sec)}
+
+/* FOOTER */
+.result-footer{margin-top:30px;padding:14px 20px;border-top:1px solid var(--border);color:var(--text-dim);font-size:11px;text-align:center}
+
+/* RESPONSIVE */
+@media(max-width:700px){
+  .top-grid{grid-template-columns:1fr}
+  .two-grid{grid-template-columns:1fr}
+  .compliance-card{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN SCREEN -->
+<div class="login-wrap" id="loginScreen">
+  <div class="login-box">
+    <div class="login-logo">⚖️</div>
+    <div class="login-title">LEX AI</div>
+    <div class="login-sub">نظام تحليل العقود القانونية بالذكاء الاصطناعي</div>
+    <input type="password" class="login-input" id="pwdInput" placeholder="أدخل كلمة الدخول" onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">دخول ← </button>
+    <div class="login-err" id="loginErr"></div>
+  </div>
+</div>
+
+<!-- MAIN APP (hidden until login) -->
+<div id="app" style="display:none">
+
+  <header>
+    <div class="logo-wrap">
+      <div class="logo-icon">⚖️</div>
+      <div>
+        <div class="logo-name">LEX AI</div>
+        <div class="logo-sub">نظام تحليل العقود القانونية</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:10px;align-items:center">
+      <span class="badge">ENTERPRISE</span>
+      <button onclick="doLogout()" style="background:none;border:1px solid var(--border);color:var(--text-sec);font-size:11px;padding:5px 12px;border-radius:8px;cursor:pointer;font-family:'Tajawal',sans-serif">خروج</button>
+    </div>
+  </header>
+
+  <div class="main">
+
+    <!-- INPUT -->
+    <div id="inputSection" class="fade-up">
+      <div class="hero">
+        <div class="hero-tag">POWERED BY AI</div>
+        <h1 class="hero-title">تحليل العقود بالذكاء الاصطناعي</h1>
+        <p class="hero-sub">الصق نص عقدك واحصل في ثوانٍ على تقرير قانوني شامل — المخاطر، البنود المفقودة، ومخاطر الامتثال</p>
+      </div>
+
+      <div class="card-0p">
+        <div class="input-header">
+          <span style="color:var(--text-sec);font-size:13px">📄 نص العقد</span>
+          <span id="charCount" style="color:var(--text-dim);font-size:11px;font-family:'JetBrains Mono',monospace">0 حرف</span>
+        </div>
+        <textarea id="contractText" placeholder="الصق نص العقد هنا — عقود الإيجار، التوريد، العمل، اتفاقيات السرية، العقود الحكومية…" oninput="updateCount()"></textarea>
+        <div class="input-footer">
+          <button class="clear-btn" onclick="clearText()">🗑 مسح</button>
+          <button class="analyze-btn" id="analyzeBtn" onclick="analyzeContract()" disabled>⚡ تحليل العقد الآن</button>
+        </div>
+      </div>
+
+      <div class="demos-row">
+        <span class="demo-label">نماذج جاهزة:</span>
+        <button class="demo-chip" onclick="loadDemo('rent')">عقد إيجار</button>
+        <button class="demo-chip" onclick="loadDemo('supply')">عقد توريد</button>
+        <button class="demo-chip" onclick="loadDemo('work')">عقد عمل</button>
+      </div>
+
+      <div class="err-box" id="errBox" style="display:none"></div>
+    </div>
+
+    <!-- LOADING -->
+    <div id="loadingSection" style="display:none" class="fade-up">
+      <div class="loading-wrap">
+        <div class="spinner"></div>
+        <div class="loading-text" id="loadingText">قراءة نصوص العقد…</div>
+        <div class="loading-sub" id="loadingSub">جارٍ تحليل العقد…</div>
+        <div class="step-dots" id="stepDots"></div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultsSection" style="display:none" class="fade-up"></div>
+
+  </div>
+</div>
+
+<script>
+// ── CONFIG ──
+const STEPS=['قراءة نصوص العقد…','تحليل البنود القانونية…','تقييم المخاطر التجارية…','فحص الامتثال التنظيمي…','إعداد التقرير الشامل…'];
+let currentStep=0, stepInterval=null;
+let userPassword='';
+
+const DEMOS={
+  rent:`عقد إيجار تجاري\nبين المؤجر: شركة العقارات الكبرى (الطرف الأول)\nوالمستأجر: مؤسسة التجارة الحديثة (الطرف الثاني)\n\nالمادة الأولى: يقوم المؤجر بتأجير المحل التجاري رقم 12 في مجمع الواحة التجاري.\nالمادة الثانية: مدة الإيجار سنة واحدة تبدأ من 1/1/2025.\nالمادة الثالثة: الإيجار السنوي 120,000 ريال يُدفع شهرياً.\nالمادة الرابعة: يدفع المستأجر مبلغ 20,000 ريال تأميناً.\nيحق للمؤجر إنهاء العقد في أي وقت بإشعار أسبوع واحد.`,
+  supply:`عقد توريد بضائع\nالطرف الأول: شركة الإمداد السعودية\nالطرف الثاني: مستشفى الرعاية الصحية\n\nالموضوع: توريد معدات طبية بقيمة 2,000,000 ريال سعودي.\nمدة التسليم: 60 يوم من توقيع العقد.\nالدفع: 50% مقدماً والباقي عند الاستلام.\nضمان سنة على عيوب الصنعة.\nلا يحق للطرف الثاني إلغاء العقد بعد السداد.\nلا يوجد بند عقوبات التأخير.`,
+  work:`عقد عمل\nصاحب العمل: شركة التقنية المتقدمة\nالموظف: أحمد محمد السالم\n\nالمسمى الوظيفي: مدير مبيعات\nالراتب: 25,000 ريال شهرياً\nمدة العقد: سنتان\nساعات العمل: 8 ساعات يومياً 6 أيام أسبوعياً\nالإجازة: 21 يوم سنوياً.\nيحق لصاحب العمل إنهاء العقد بإشعار أسبوع واحد.\nلا يوجد بند عدم منافسة ولا اتفاقية سرية.`,
+};
+
+// ── LOGIN ──
+function doLogin(){
+  const pwd=document.getElementById('pwdInput').value;
+  if(!pwd){document.getElementById('loginErr').textContent='أدخل كلمة الدخول';return;}
+  userPassword=pwd;
+  document.getElementById('loginErr').textContent='';
+  // Test connection
+  fetch('/api/analyze',{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({text:'اختبار',password:pwd})
+  }).then(r=>{
+    if(r.status===401){document.getElementById('loginErr').textContent='❌ كلمة المرور غير صحيحة';userPassword='';}
+    else{document.getElementById('loginScreen').style.display='none';document.getElementById('app').style.display='block';}
+  }).catch(()=>{
+    // If server not running, still let through for demo
+    document.getElementById('loginScreen').style.display='none';
+    document.getElementById('app').style.display='block';
+  });
+}
+function doLogout(){
+  userPassword='';
+  document.getElementById('loginScreen').style.display='flex';
+  document.getElementById('app').style.display='none';
+  document.getElementById('pwdInput').value='';
+  reset();
+}
+document.getElementById('pwdInput').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin();});
+
+// ── INPUT ──
+function updateCount(){
+  const t=document.getElementById('contractText').value;
+  document.getElementById('charCount').textContent=t.length.toLocaleString('ar')+' حرف';
+  document.getElementById('analyzeBtn').disabled=t.trim().length<20;
+}
+function clearText(){document.getElementById('contractText').value='';updateCount();}
+function loadDemo(k){document.getElementById('contractText').value=DEMOS[k];updateCount();}
+
+// ── ANALYSIS ──
+async function analyzeContract(){
+  const text=document.getElementById('contractText').value.trim();
+  if(!text) return;
+  show('loading');
+  startSteps(text.length);
+  hideErr();
+  try{
+    const res=await fetch('/api/analyze',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({text,password:userPassword})
+    });
+    stopSteps();
+    if(!res.ok){const e=await res.json();throw new Error(e.error||`خطأ ${res.status}`);}
+    const data=await res.json();
+    renderResults(data);
+    show('results');
+  }catch(err){
+    stopSteps();
+    show('input');
+    showErr('❌ '+err.message);
+  }
+}
+
+function show(section){
+  document.getElementById('inputSection').style.display=section==='input'?'block':'none';
+  document.getElementById('loadingSection').style.display=section==='loading'?'block':'none';
+  document.getElementById('resultsSection').style.display=section==='results'?'block':'none';
+}
+function reset(){show('input');document.getElementById('contractText').value='';updateCount();hideErr();}
+function showErr(msg){const b=document.getElementById('errBox');b.textContent=msg;b.style.display='block';}
+function hideErr(){document.getElementById('errBox').style.display='none';}
+
+function startSteps(len){
+  currentStep=0;
+  document.getElementById('loadingSub').textContent='يتم تحليل '+len.toLocaleString('ar')+' حرف…';
+  renderDots();
+  document.getElementById('loadingText').textContent=STEPS[0];
+  stepInterval=setInterval(()=>{
+    currentStep=Math.min(currentStep+1,STEPS.length-1);
+    document.getElementById('loadingText').textContent=STEPS[currentStep];
+    renderDots();
+  },900);
+}
+function stopSteps(){clearInterval(stepInterval);}
+function renderDots(){
+  const c=document.getElementById('stepDots');
+  c.innerHTML=STEPS.map((_,i)=>`<div class="step-dot ${i<=currentStep?'active':'inactive'}"></div>`).join('');
+}
+
+// ── COLORS ──
+const SEV={
+  critical:{color:'#E63946',bg:'rgba(230,57,70,.10)',label:'حرج'},
+  high:{color:'#F4A261',bg:'rgba(244,162,97,.10)',label:'مرتفع'},
+  medium:{color:'#F9C74F',bg:'rgba(249,199,79,.10)',label:'متوسط'},
+  low:{color:'#4CC9A4',bg:'rgba(76,201,164,.10)',label:'منخفض'},
+};
+const PRI={urgent:{color:'#E63946',label:'عاجل'},high:{color:'#F4A261',label:'مرتفع'},medium:{color:'#F9C74F',label:'متوسط'}};
+function riskColor(s){return s>=70?'#E63946':s>=40?'#F4A261':'#4CC9A4';}
+function riskLabel(s){return s>=70?'⚠️ مخاطرة عالية':s>=40?'⚡ متوسطة':'✅ منخفضة';}
+function pill(label,color){return `<span class="badge-pill" style="background:${color}18;color:${color};border:1px solid ${color}30">${label}</span>`;}
+
+// ── RENDER RESULTS ──
+function renderResults(d){
+  const score=d.risk_score||0;
+  const col=riskColor(score);
+  const r=54,circ=2*Math.PI*r,off=circ-(score/100)*circ;
+
+  const tabs=['overview','issues','missing','compliance','recs'];
+  const tabLabels=['نظرة عامة',`المشاكل (${d.critical_issues?.length||0})`,`بنود مفقودة (${d.missing_clauses?.length||0})`,`الامتثال (${d.compliance_issues?.length||0})`,`التوصيات (${d.recommendations?.length||0})`];
+
+  document.getElementById('resultsSection').innerHTML=`
+    <div class="results-top">
+      <button class="back-btn" onclick="reset()">← تحليل عقد جديد</button>
+      <span class="contract-type">${d.contract_type||'عقد تجاري'}</span>
+    </div>
+
+    <div class="top-grid">
+      <div class="card gauge-wrap">
+        <div style="font-size:11px;color:var(--text-sec);margin-bottom:14px;letter-spacing:.5px">درجة المخاطرة</div>
+        <div class="gauge-inner">
+          <svg width="148" height="148" style="transform:rotate(-90deg)">
+            <circle cx="74" cy="74" r="${r}" fill="none" stroke="var(--border)" stroke-width="11"/>
+            <circle cx="74" cy="74" r="${r}" fill="none" stroke="${col}" stroke-width="11"
+              stroke-dasharray="${circ}" stroke-dashoffset="${off}" stroke-linecap="round"
+              style="transition:stroke-dashoffset 1.4s ease"/>
+          </svg>
+          <div class="gauge-text">
+            <span class="gauge-score" style="color:${col}">${score}</span>
+            <span class="gauge-sub">/100</span>
+          </div>
+        </div>
+        <div class="gauge-label" style="color:${col}">${riskLabel(score)}</div>
+      </div>
+      <div class="stats-grid">
+        ${[
+          {icon:'🚨',label:'مشاكل حرجة',val:d.critical_issues?.length||0,color:'#E63946'},
+          {icon:'📋',label:'بنود مفقودة',val:d.missing_clauses?.length||0,color:'#F4A261'},
+          {icon:'⚖️',label:'مخاطر امتثال',val:d.compliance_issues?.length||0,color:'#F9C74F'},
+          {icon:'💡',label:'توصيات',val:d.recommendations?.length||0,color:'#4CC9A4'},
+        ].map(s=>`<div class="stat-card"><span class="stat-icon">${s.icon}</span><div><div class="stat-val" style="color:${s.color}">${s.val}</div><div class="stat-label">${s.label}</div></div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="assessment">
+      <span class="assessment-icon">📊</span>
+      <div>
+        <div class="assessment-tag">التقييم الإجمالي</div>
+        <div class="assessment-text">${d.overall_assessment||''}</div>
+        ${d.contract_value_exposure?`<div class="assessment-exposure">التعرض المالي المقدّر: <span class="exposure-val">${d.contract_value_exposure}</span></div>`:''}
+      </div>
+    </div>
+
+    <div class="tabs">
+      ${tabLabels.map((l,i)=>`<button class="tab-btn ${i===0?'active':''}" onclick="switchTab('${tabs[i]}',this)">${l}</button>`).join('')}
+    </div>
+
+    <div id="tabContent" class="fade-up">
+      ${renderOverview(d)}
+    </div>
+
+    <div class="result-footer">هذا التحليل للأغراض الاستشارية ولا يُعدّ استشارة قانونية رسمية — يُنصح بمراجعة محامٍ متخصص</div>
+  `;
+  window._analysisData=d;
+}
+
+function switchTab(id,btn){
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const tc=document.getElementById('tabContent');
+  tc.style.animation='none';
+  const d=window._analysisData;
+  tc.innerHTML={
+    overview:renderOverview(d),
+    issues:renderIssues(d),
+    missing:renderMissing(d),
+    compliance:renderCompliance(d),
+    recs:renderRecs(d),
+  }[id]||'';
+  void tc.offsetWidth;
+  tc.style.animation='fadeUp .3s ease';
+}
+
+function renderOverview(d){
+  const positives=(d.positive_aspects||[]).map(p=>`<div style="display:flex;gap:10px;margin-bottom:9px;align-items:flex-start"><span style="color:var(--green);font-size:8px;flex-shrink:0;margin-top:5px">●</span><span style="font-size:13px;line-height:1.75">${p}</span></div>`).join('');
+  const issues=(d.critical_issues||[]).slice(0,3).map(iss=>{
+    const s=SEV[iss.severity]||SEV.medium;
+    return `<div style="background:${s.bg};border:1px solid ${s.color}28;border-radius:16px;padding:18px">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <span style="font-size:13px;font-weight:700;color:${s.color}">${iss.title}</span>${pill(s.label,s.color)}
+      </div>
+      <p style="font-size:12px;color:var(--text-sec);line-height:1.75">${iss.description}</p>
+      ${iss.financial_impact?`<div style="margin-top:8px;font-size:12px;color:${s.color};font-weight:600">💰 ${iss.financial_impact}</div>`:''}
+    </div>`;
+  }).join('');
+  return `<div class="two-grid">${positives?`<div class="card"><div style="font-size:13px;font-weight:700;color:var(--green);margin-bottom:12px">✅ الجوانب الإيجابية</div>${positives}</div>`:''} ${issues}</div>`;
+}
+
+function renderIssues(d){
+  if(!d.critical_issues?.length) return '<div style="text-align:center;color:var(--text-sec);padding:50px;font-size:14px">لا توجد مشاكل حرجة ✅</div>';
+  return `<div class="issues-list">${d.critical_issues.map(iss=>{
+    const s=SEV[iss.severity]||SEV.medium;
+    return `<div class="issue-card" style="border-right-color:${s.color};border:1px solid ${s.color}28;border-right:4px solid ${s.color}">
+      <div class="issue-head"><span class="issue-title">${iss.title}</span>${pill(s.label,s.color)}</div>
+      <p class="issue-desc">${iss.description}</p>
+      ${iss.financial_impact?`<div class="impact-box" style="background:${s.color}10;border:1px solid ${s.color}20;color:${s.color}">💰 <span>${iss.financial_impact}</span></div>`:''}
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderMissing(d){
+  if(!d.missing_clauses?.length) return '<div style="text-align:center;color:var(--text-sec);padding:50px;font-size:14px">العقد مكتمل البنود ✅</div>';
+  const colMap={critical:'#E63946',high:'#F4A261',medium:'#F9C74F'};
+  return `<div class="two-grid">${d.missing_clauses.map(m=>{
+    const col=colMap[m.importance]||'#F9C74F';
+    const lbl=m.importance==='critical'?'ضروري':m.importance==='high'?'مهم':'مستحسن';
+    return `<div class="card">
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+        <span style="font-size:13px;font-weight:700">📋 ${m.clause}</span>${pill(lbl,col)}
+      </div>
+      <p style="font-size:12px;color:var(--text-sec);line-height:1.75">${m.recommendation}</p>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+function renderCompliance(d){
+  if(!d.compliance_issues?.length) return '<div style="text-align:center;color:var(--text-sec);padding:50px;font-size:14px">لا توجد مخاطر امتثال ✅</div>';
+  return `<div class="issues-list">${d.compliance_issues.map(c=>`
+    <div class="compliance-card">
+      <div><div class="comp-label">النظام / القانون</div><div style="font-size:13px;font-weight:700;color:var(--yellow)">⚖️ ${c.regulation}</div></div>
+      <div><div class="comp-label">المشكلة</div><div style="font-size:13px;line-height:1.7">${c.issue}</div></div>
+      <div><div class="comp-label">العقوبة</div><div style="font-size:13px;color:var(--red);font-weight:700">${c.penalty}</div></div>
+    </div>`).join('')}</div>`;
+}
+
+function renderRecs(d){
+  if(!d.recommendations?.length) return '<div style="text-align:center;color:var(--text-sec);padding:50px">لا توجد توصيات</div>';
+  return `<div class="issues-list">${d.recommendations.map((r,i)=>{
+    const p=PRI[r.priority]||PRI.medium;
+    return `<div class="rec-card">
+      <div class="rec-num" style="background:${p.color}12;border:1px solid ${p.color}28;color:${p.color}">${i+1}</div>
+      <div style="flex:1">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;flex-wrap:wrap;gap:8px">
+          <span style="font-size:14px;font-weight:700">${r.action}</span>${pill(p.label,p.color)}
+        </div>
+        ${r.impact?`<div class="rec-impact">→ ${r.impact}</div>`:''}
+      </div>
+    </div>`;
+  }).join('')}</div>`;
+}
+</script>
+</body>
+</html>
